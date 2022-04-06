@@ -76,6 +76,8 @@ PStatTimeline(PStatMonitor *monitor, int xsize, int ysize) :
 
   _start_time = _lowest_start_time;
   _target_start_time = _start_time;
+
+  monitor->_timelines.insert(this);
 }
 
 /**
@@ -83,6 +85,7 @@ PStatTimeline(PStatMonitor *monitor, int xsize, int ysize) :
  */
 PStatTimeline::
 ~PStatTimeline() {
+  _monitor->_timelines.erase(this);
 }
 
 /**
@@ -259,6 +262,42 @@ get_bar_tooltip(int row, int x) const {
     }
   }
   return std::string();
+}
+
+/**
+ * Writes the graph state to a datagram.
+ */
+void PStatTimeline::
+write_datagram(Datagram &dg) const {
+  dg.add_float64(_time_scale);
+  dg.add_float64(_start_time);
+  dg.add_float64(_lowest_start_time);
+  dg.add_float64(_highest_end_time);
+
+  PStatGraph::write_datagram(dg);
+}
+
+/**
+ * Restores the graph state from a datagram.
+ */
+void PStatTimeline::
+read_datagram(DatagramIterator &scan) {
+  _time_scale = scan.get_float64();
+  _start_time = scan.get_float64();
+  _lowest_start_time = scan.get_float64();
+  _highest_end_time = scan.get_float64();
+
+  _scroll_speed = 0.0;
+  _zoom_speed = 0.0;
+
+  _have_start_time = true;
+  _target_start_time = _start_time;
+  _target_time_scale = _time_scale;
+
+  PStatGraph::read_datagram(scan);
+
+  normal_guide_bars();
+  force_redraw();
 }
 
 /**

@@ -25,9 +25,7 @@ static const int default_strip_chart_height = 100;
 GtkStatsStripChart::
 GtkStatsStripChart(GtkStatsMonitor *monitor, int thread_index,
                    int collector_index, bool show_level) :
-  PStatStripChart(monitor,
-                  show_level ? monitor->get_level_view(0, thread_index) : monitor->get_view(thread_index),
-                  thread_index, collector_index, 0, 0),
+  PStatStripChart(monitor, thread_index, collector_index, show_level, 0, 0),
   GtkStatsGraph(monitor, true)
 {
   if (show_level) {
